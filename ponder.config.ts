@@ -1,42 +1,32 @@
-import { parseAbiItem } from "abitype";
 import { createConfig, factory } from "ponder";
-
-import { LlamaCoreAbi } from "./abis/LlamaCoreAbi";
-import { LlamaPolicyAbi } from "./abis/LlamaPolicyAbi";
-
-const llamaFactoryEvent = parseAbiItem(
-  "event LlamaInstanceCreated(address indexed deployer, string indexed name, address llamaCore, address llamaExecutor, address llamaPolicy, uint256 chainId)"
-);
+import { MasterAbi } from "./abis/MasterAbi";
+import { FactoryAbi } from "./abis/FactoryAbi";
 
 export default createConfig({
   chains: {
-    sepolia: {
-      id: 11155111,
-      rpc: process.env.PONDER_RPC_URL_11155111,
+    monadTestnet: {
+      id: 10143,
+      rpc: "https://testnet-rpc.monad.xyz/",
     },
   },
   contracts: {
-    LlamaCore: {
-      chain: "sepolia",
-      abi: LlamaCoreAbi,
-      address: factory({
-        address: "0xFf5d4E226D9A3496EECE31083a8F493edd79AbEB",
-        event: llamaFactoryEvent,
-        parameter: "llamaCore",
-      }),
-      startBlock: 4121269,
-      endBlock: 5857446,
+    Master: {
+      chain: "monadTestnet",
+      abi: MasterAbi,
+      address:
+        (process.env.CONTRACT_ADDRESS as `0x${string}`) ||
+        "0xfcb5b4b87E3c7716a136b290465A18e93a06fDBa",
+      startBlock: 24295131,
+      endBlock: 24319542,
     },
-    LlamaPolicy: {
-      chain: "sepolia",
-      abi: LlamaPolicyAbi,
-      address: factory({
-        address: "0xFf5d4E226D9A3496EECE31083a8F493edd79AbEB",
-        event: llamaFactoryEvent,
-        parameter: "llamaPolicy",
-      }),
-      startBlock: 4121269,
-      endBlock: 5857446,
+    Factory: {
+      chain: "monadTestnet",
+      abi: FactoryAbi,
+      address:
+        (process.env.CONTRACTFACTORY_ADDRESS as `0x${string}`) ||
+        "0x45FF838c0160FB1E1675074C8552D22dD9E87c44",
+      startBlock: 24295131,
+      endBlock: 24319542,
     },
   },
 });
