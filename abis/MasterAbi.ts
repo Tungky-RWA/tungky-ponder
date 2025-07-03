@@ -124,6 +124,7 @@ export const MasterAbi = [
   {
     inputs: [
       { internalType: "address", name: "_brandWallet", type: "address" },
+      { internalType: "address", name: "_minterWallet", type: "address" },
     ],
     name: "approveBrand",
     outputs: [],

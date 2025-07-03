@@ -16,8 +16,7 @@ export default createConfig({
       address:
         (process.env.CONTRACT_ADDRESS as `0x${string}`) ||
         "0xfcb5b4b87E3c7716a136b290465A18e93a06fDBa",
-      startBlock: 24295131,
-      endBlock: 24319542,
+      startBlock: 24436832,
     },
     Factory: {
       chain: "monadTestnet",
@@ -25,8 +24,7 @@ export default createConfig({
       address:
         (process.env.CONTRACTFACTORY_ADDRESS as `0x${string}`) ||
         "0x45FF838c0160FB1E1675074C8552D22dD9E87c44",
-      startBlock: 24295131,
-      endBlock: 24319542,
+      startBlock: 24436832,
     },
   },
 });

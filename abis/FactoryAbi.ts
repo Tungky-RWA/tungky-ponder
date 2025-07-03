@@ -1,5 +1,15 @@
 export const FactoryAbi = [
-  { inputs: [], stateMutability: "nonpayable", type: "constructor" },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_implementationAddress",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
   { inputs: [], name: "AccessControlBadConfirmation", type: "error" },
   {
     inputs: [
@@ -119,11 +129,19 @@ export const FactoryAbi = [
   {
     inputs: [
       { internalType: "address", name: "_brandWallet", type: "address" },
+      { internalType: "address", name: "_minterWallet", type: "address" },
       { internalType: "address", name: "couponContract", type: "address" },
     ],
     name: "approveBrand",
     outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "brandNFTImplementation",
+    outputs: [{ internalType: "address", name: "", type: "address" }],
+    stateMutability: "view",
     type: "function",
   },
   {
