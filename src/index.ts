@@ -3,13 +3,13 @@ import { brand } from "ponder:schema";
 
 ponder.on("Factory:BrandRegistered", async ({ event, context }) => {
   const { brandWallet, nftContractAddress, name, isLegalVerified } = event.args;
+  console.log("📦 Event received:", event.args);
 
   // if (isLegalVerified) {
   //   console.log("MASUKKKK");
   //   await context.db
   //     .update(brand, { BrandWalletAddress: brandWallet })
   //     .set({ verified: isLegalVerified });
-
   // }
 
   await context.db
