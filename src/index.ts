@@ -39,7 +39,7 @@ ponder.on("BrandNFT:PreMintedNFT", async ({ event, context }) => {
     transactionHash: event.transaction.hash,
     logIndex: BigInt(event.log.logIndex),
     status: "premint",
-  }).onConflictDoNothing;
+  });
 });
 
 // Event 2: Saat NFT di-update
@@ -63,7 +63,7 @@ ponder.on("BrandNFT:PreMintNFTUpdated", async ({ event, context }) => {
     latitude: BigInt(0), // or replace with real value if exists
     longitude: BigInt(0), // or replace with real value if exists
     status: "premint",
-  }).onConflictDoNothing;
+  });
 });
 
 ponder.on("BrandNFT:Transfer", async ({ event, context }) => {
