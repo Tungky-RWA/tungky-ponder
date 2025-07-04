@@ -1,7 +1,12 @@
 import { createConfig, factory } from "ponder";
 import { MasterAbi } from "./abis/MasterAbi";
 import { FactoryAbi } from "./abis/FactoryAbi";
+import { BrandNFTAbi } from "./abis/BrandNFTAbi";
 import { parseAbiItem } from "viem";
+
+const FactoryEvent = parseAbiItem(
+  "event BrandRegistered(address indexed brandWallet,address indexed nftContractAddress,string name,bool isLegalVerified)"
+);
 
 export default createConfig({
   chains: {
@@ -16,21 +21,27 @@ export default createConfig({
       abi: MasterAbi,
       address: process.env.MASTER_ADDRESS as `0x${string}`,
       startBlock: 24436113,
-      endBlock: 24459809,
+      // endBlock: 24459809,
     },
     Factory: {
       chain: "monadTestnet",
       abi: FactoryAbi,
-
+      address: process.env.CONTRACTFACTORY_ADDRESS as `0x${string}`,
       startBlock: 24436113,
-      endBlock: 24459809,
+      // endBlock: 24459809,
+    },
+    BrandNFT: {
+      chain: "monadTestnet",
+      abi: BrandNFTAbi,
+      startBlock: 24436113,
+      // endBlock: 24459809,
       address: factory({
         // Address of the factory contract.
         address: process.env.CONTRACTFACTORY_ADDRESS as `0x${string}`,
         // Event from the factory contract ABI which contains the child address.
-        event: parseAbiItem("event NewPair(address poolAddress)"),
+        event: FactoryEvent,
         // Name of the event parameter containing the child address.
-        parameter: "poolAddress",
+        parameter: "nftContractAddress",
       }),
     },
   },

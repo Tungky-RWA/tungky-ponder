@@ -4,12 +4,51 @@ import { Hono } from "hono";
 import { client, graphql } from "ponder";
 import { brand } from "ponder:schema";
 import { PinataSDK } from "pinata";
-
+import {
+  getContract,
+  createWalletClient,
+  http,
+  PrivateKeyAccount,
+  createPublicClient,
+  isAddress,
+} from "viem";
+import { monadTestnet } from "viem/chains";
+import { privateKeyToAccount } from "viem/accounts";
+import { BrandNFTAbi } from "../../abis/BrandNFTAbi";
 interface Bindings {
   PINATA_JWT: string;
   GATEWAY_URL: string;
 }
 
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
+// Pastikan private key dari environment variable Anda diawali dengan '0x'
+const rawPrivateKey = process.env.PRIVATE_KEY;
+
+// Validasi dan format private key
+let privateKey: `0x${string}`;
+if (rawPrivateKey && rawPrivateKey.startsWith("0x")) {
+  privateKey = rawPrivateKey as `0x${string}`;
+} else if (rawPrivateKey) {
+  privateKey = `0x${rawPrivateKey}` as `0x${string}`; // Tambahkan '0x' jika belum ada
+} else {
+  throw new Error("PRIVATE_KEY environment variable is not set.");
+}
+
+// --- Inisialisasi Viem Clients ---
+const publicClient = createPublicClient({
+  chain: monadTestnet, // Pastikan ini sesuai dengan jaringan Anda
+  transport: http("https://testnet-rpc.monad.xyz/"),
+});
+
+const account = privateKeyToAccount(privateKey);
+const walletClient = createWalletClient({
+  account,
+  chain: monadTestnet, // Pastikan ini sesuai dengan jaringan Anda
+  transport: http("https://testnet-rpc.monad.xyz/"),
+});
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -21,27 +60,71 @@ app.get("/brands", async (c: any) => {
   return c.json(brands);
 });
 
+app.post("/api/claim-nft", async (c) => {
+  try {
+    // Membaca semua data dari body JSON
+    const { contractAddress, to, tokenId } = await c.req.json();
 
-app.get('/presigned_url', async (c) => {
+    // 1. Validasi Input
+    // Pastikan contractAddress adalah alamat Ethereum yang valid
+    if (!isAddress(contractAddress)) {
+      return c.json(
+        {
+          error:
+            'Invalid input: "contractAddress" must be a valid Ethereum address.',
+        },
+        400
+      );
+    }
+    // Validasi 'to' dan 'tokenId'
+    if (!isAddress(to)) {
+      return c.json(
+        { error: 'Invalid input: "to" must be a valid Ethereum address.' },
+        400
+      );
+    }
+    if (typeof tokenId !== "number") {
+      return c.json(
+        { error: 'Invalid input: "tokenId" must be a number.' },
+        400
+      );
+    }
 
-	// Handle Auth
+    // Mendapatkan instance kontrak BrandNFT Anda DENGAN ALAMAT DARI REQUEST
+    // Sekarang brandNFTContract akan dibuat spesifik untuk setiap panggilan
 
-  console.log(c.env.PINATA_JWT);
+    // 2. Simulasi Transaksi menggunakan Viem
+    // Perhatikan bahwa brandNFTContract yang digunakan di sini adalah instance yang baru dibuat
+    const { request } = await publicClient.simulateContract({
+      account,
+      address: contractAddress, // Gunakan alamat dari body request
+      abi: BrandNFTAbi,
+      functionName: "claimNFT",
+      args: [to, BigInt(tokenId)],
+    });
 
-  
+    // 3. Kirim Transaksi ke blockchain menggunakan Viem
+    const hash = await walletClient.writeContract(request);
 
-  const pinata = new PinataSDK({
-    pinataJwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJhNzFkOWEzZi1iNmJlLTQyZGItYjViNy1iYjg1YWRjM2M5ZGYiLCJlbWFpbCI6Imhkenp6enp6MDFAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6ImUyMDEzMWExZWI0YTBlZTNhZWJlIiwic2NvcGVkS2V5U2VjcmV0IjoiNzQ4MzFhYTNhNjllNGY0NjVjMjQ4NGE0OWFkM2IwZWYwMzhkNjJiZTE0ODk1NWFlOTEzNjM3N2Q3MTY2YzJhYSIsImV4cCI6MTc4MzE1Nzc3N30.JHrkuiGdEDoCTOqN1i8zvmtsxPPCXESksVBE2JFLTUA",
-    pinataGateway: "https://copper-defeated-gopher-612.mypinata.cloud"
-  })
+    // 4. Tunggu Konfirmasi Transaksi menggunakan Viem
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
 
-  const url = await pinata.upload.public.createSignedURL({
-    expires: 60 // Last for 60 seconds
-  })
-
-  return c.json({ url }, { status: 200 })
-})
-
+    // 5. Kirim Respon Sukses
+    return c.json({
+      message: `NFT with tokenId ${tokenId} claimed successfully by ${to} on contract ${contractAddress}!`,
+      transactionHash: hash,
+      receipt: receipt,
+    });
+  } catch (error: any) {
+    console.error("Error claiming NFT:", error);
+    const errorMessage =
+      error.cause?.reason ||
+      error.shortMessage ||
+      error.message ||
+      "Failed to claim NFT.";
+    return c.json({ error: errorMessage }, 500);
+  }
+});
 
 app.use("/", graphql({ db, schema }));
 app.use("/graphql", graphql({ db, schema }));

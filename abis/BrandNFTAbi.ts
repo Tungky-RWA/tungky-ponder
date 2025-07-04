@@ -542,4 +542,4 @@ export const BrandNFTAbi = [
     stateMutability: "nonpayable",
     type: "function",
   },
-];
+] as const;

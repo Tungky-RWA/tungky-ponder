@@ -1,4 +1,6 @@
-import { onchainTable, relations } from "ponder";
+import { onchainTable, relations, onchainEnum, primaryKey } from "ponder";
+
+export const statusMint = onchainEnum("statusMint", ["premint", "mint"]);
 
 export const brand = onchainTable("brand", (t) => ({
   BrandWalletAddress: t.hex().primaryKey(), // ← primary key
@@ -11,23 +13,28 @@ export const brand = onchainTable("brand", (t) => ({
   logIndex: t.text(),
 }));
 
-export const nft = onchainTable("nft", (t) => ({
-  Id: t.text().primaryKey(),
-  NameNFT: t.text(),
-  ownerAddress: t.hex(),
-  NftContractAddress: t.hex(),
-  blockNumber: t.bigint(),
-  blockTimestamp: t.bigint(),
-  transactionHash: t.hex(),
-  logIndex: t.bigint(),
-  latitude: t.bigint(),
-  longitude: t.bigint(),
-}));
+export const nft = onchainTable(
+  "nft",
+  (t) => ({
+    tokenId: t.bigint(),
+    NftContractAddress: t.hex(),
+    ownerAddress: t.hex(),
+    blockNumber: t.bigint(),
+    blockTimestamp: t.bigint(),
+    transactionHash: t.hex(),
+    logIndex: t.bigint(),
+    latitude: t.bigint(),
+    longitude: t.bigint(),
+    status: statusMint("statusMint"),
+  }),
+  (table) => ({
+    pk: primaryKey({ columns: [table.tokenId, table.NftContractAddress] }),
+  })
+);
 
 export const nftTransfer = onchainTable("nftTransfer", (t) => ({
-  id: t.bigint().primaryKey(), // auto-increment id
-  serial: t.text(), // serial.
-  contractAddress: t.hex(),
+  id: t.text().primaryKey(), // auto-increment id
+  NftContractAddress: t.hex(),
   tokenId: t.bigint(),
   from: t.hex(),
   to: t.hex(),
@@ -36,15 +43,24 @@ export const nftTransfer = onchainTable("nftTransfer", (t) => ({
   transactionHash: t.text(),
 }));
 
-// 3️⃣ Relasi: Brand has many NFTs
+// Brand has many NFTs
 export const brandRelations = relations(brand, ({ many }) => ({
-  nfts: many(nft), // ← many NFT
+  nfts: many(nft),
 }));
 
-// 4️⃣ Relasi: NFT belongs to one Brand
-export const nftRelations = relations(nft, ({ one }) => ({
+// NFT belongs to one Brand & has many Transfers
+export const nftRelations = relations(nft, ({ one, many }) => ({
   brand: one(brand, {
-    fields: [nft.NftContractAddress], // ← foreign key di nft
-    references: [brand.NftContractAddress], // ← primary key (or unique key) di brand
+    fields: [nft.NftContractAddress],
+    references: [brand.NftContractAddress],
+  }),
+  transfers: many(nftTransfer),
+}));
+
+// NFTTransfer belongs to one NFT
+export const nftTransferRelations = relations(nftTransfer, ({ one }) => ({
+  nft: one(nft, {
+    fields: [nftTransfer.tokenId, nftTransfer.NftContractAddress],
+    references: [nft.tokenId, nft.NftContractAddress],
   }),
 }));
