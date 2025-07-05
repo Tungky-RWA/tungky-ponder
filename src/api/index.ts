@@ -60,6 +60,13 @@ app.get("/brands", async (c: any) => {
   return c.json(brands);
 });
 
+app.get("/current-block", async (c: any) => {
+  const blockNumber = await publicClient.getBlockNumber();
+  console.log("Current block number:", blockNumber);
+
+  return c.json(blockNumber);
+});
+
 app.post("/api/claim-nft", async (c) => {
   try {
     // Membaca semua data dari body JSON
