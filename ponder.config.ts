@@ -20,20 +20,20 @@ export default createConfig({
       chain: "monadTestnet",
       abi: MasterAbi,
       address: process.env.MASTER_ADDRESS as `0x${string}`,
-      startBlock: 4746700,
+      startBlock: 24747506,
       // endBlock: 24459809,
     },
     Factory: {
       chain: "monadTestnet",
       abi: FactoryAbi,
       address: process.env.CONTRACTFACTORY_ADDRESS as `0x${string}`,
-      startBlock: 4746700,
+      startBlock: 24747506,
       // endBlock: 24459809,
     },
     BrandNFT: {
       chain: "monadTestnet",
       abi: BrandNFTAbi,
-      startBlock: 4746700,
+      startBlock: 24747506,
       // endBlock: 24459809,
       address: factory({
         // Address of the factory contract.
