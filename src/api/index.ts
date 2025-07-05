@@ -64,7 +64,7 @@ app.get("/current-block", async (c: any) => {
   const blockNumber = await publicClient.getBlockNumber();
   console.log("Current block number:", blockNumber);
 
-  return c.json(blockNumber);
+  return c.json({ blocknow: blockNumber });
 });
 
 app.post("/api/claim-nft", async (c) => {

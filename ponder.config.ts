@@ -13,27 +13,30 @@ export default createConfig({
     monadTestnet: {
       id: 10143,
       rpc: "https://testnet-rpc.monad.xyz/",
+      disableCache: false,
+      pollingInterval: 1_500,
     },
   },
+
   contracts: {
     Master: {
       chain: "monadTestnet",
       abi: MasterAbi,
       address: process.env.MASTER_ADDRESS as `0x${string}`,
-      startBlock: 24747800,
+      startBlock: 24752800,
       // endBlock: 24459809,
     },
     Factory: {
       chain: "monadTestnet",
       abi: FactoryAbi,
       address: process.env.CONTRACTFACTORY_ADDRESS as `0x${string}`,
-      startBlock: 24747800,
+      startBlock: 24752800,
       // endBlock: 24459809,
     },
     BrandNFT: {
       chain: "monadTestnet",
       abi: BrandNFTAbi,
-      startBlock: 24747800,
+      startBlock: 24752800,
       // endBlock: 24459809,
       address: factory({
         // Address of the factory contract.
