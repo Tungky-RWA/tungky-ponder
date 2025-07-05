@@ -90,12 +90,6 @@ app.post("/api/claim-nft", async (c) => {
         400
       );
     }
-    if (typeof tokenId !== "number") {
-      return c.json(
-        { error: 'Invalid input: "tokenId" must be a number.' },
-        400
-      );
-    }
 
     // Mendapatkan instance kontrak BrandNFT Anda DENGAN ALAMAT DARI REQUEST
     // Sekarang brandNFTContract akan dibuat spesifik untuk setiap panggilan
