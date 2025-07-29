@@ -12,7 +12,7 @@ import {
   createPublicClient,
   isAddress,
 } from "viem";
-import { monadTestnet } from "viem/chains";
+import { liskSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { BrandNFTAbi } from "../../abis/BrandNFTAbi";
 interface Bindings {
@@ -39,15 +39,15 @@ if (rawPrivateKey && rawPrivateKey.startsWith("0x")) {
 
 // --- Inisialisasi Viem Clients ---
 const publicClient = createPublicClient({
-  chain: monadTestnet, // Pastikan ini sesuai dengan jaringan Anda
-  transport: http("https://testnet-rpc.monad.xyz/"),
+  chain: liskSepolia, // Pastikan ini sesuai dengan jaringan Anda
+  transport: http("https://rpc.sepolia-api.lisk.com"),
 });
 
 const account = privateKeyToAccount(privateKey);
 const walletClient = createWalletClient({
   account,
-  chain: monadTestnet, // Pastikan ini sesuai dengan jaringan Anda
-  transport: http("https://testnet-rpc.monad.xyz/"),
+  chain: liskSepolia, // Pastikan ini sesuai dengan jaringan Anda
+  transport: http("https://rpc.sepolia-api.lisk.com"),
 });
 
 const app = new Hono<{ Bindings: Bindings }>();
